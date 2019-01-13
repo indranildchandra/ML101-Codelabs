@@ -210,10 +210,10 @@ def pretty_print_tree(root):
 
 
 def main():
-    argv = sys.argv
-    print("Command line args are {}: ".format(argv))
-
-    config = load_config(argv[1])
+    # argv = sys.argv
+    # print("Command line args are {}: ".format(argv))
+    # config = load_config(argv[1])
+    config = load_config('./../resources/tennis.cfg')
 
     data = load_csv_to_header_data(config['data_file'])
     data = project_columns(data, config['data_project_columns'])
@@ -231,5 +231,3 @@ def main():
 
 if __name__ == "__main__": main()
 
-
-#python ID3Example.py ./../resources/tennis.cfg

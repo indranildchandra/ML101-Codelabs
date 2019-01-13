@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
 
+#plot parameters
 plt.rcParams['figure.figsize'] = (16, 9)
 
 # Creating a sample dataset with 4 clusters
