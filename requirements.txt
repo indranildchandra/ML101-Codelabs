@@ -1,0 +1,12 @@
+numpy==1.15.4
+pandas==0.19.2
+scikit-image==0.13.dev0
+scikit-learn==0.18.1
+matplotlib==2.0.0
+mpld3==0.3
+tensorflow==1.1.0
+keras==2.1.2
+jupyter==1.0.0
+jupyter-client==5.0.0
+jupyter-console==5.1.0
+jupyter-core==4.3.0
