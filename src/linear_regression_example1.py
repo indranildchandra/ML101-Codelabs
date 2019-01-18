@@ -88,7 +88,7 @@ def simple_linear_regression(train, test):
 # Simple linear regression on SwedishMotorInsurance dataset
 seed(1)
 # load and prepare data
-filename = './../resources/SwedishMotorInsurance.csv'
+filename = './../resources/swedish_motor_insurance.csv'
 dataset = load_csv(filename)
 for i in range(len(dataset[0])):
 	str_column_to_float(dataset, i)
