@@ -1,63 +1,98 @@
-import collections
+# Simple Linear Regression on the Swedish Insurance Dataset
+from random import seed
+from random import randrange
+from csv import reader
+from math import sqrt
 
-stepSize = 0.01 # learning rate
+# Load a CSV file
+def load_csv(filename):
+	dataset = list()
+	with open(filename, 'r') as file:
+		csv_reader = reader(file)
+		for row in csv_reader:
+			if not row:
+				continue
+			dataset.append(row)
+	return dataset
 
+# Convert string column to float
+def str_column_to_float(dataset, column):
+	for row in dataset:
+		row[column] = float(row[column].strip())
 
-def read_data() :
-    data = open("./../resources/vehicle_sale_data.csv" , "r")
-    gdp_sale = collections.OrderedDict()
-    for line in data.readlines()[1:] :
-        record = line.split(",")
-        gdp_sale[float(record[1])] = float(record[2].replace('\n', ""))
-    print(gdp_sale)
-    return gdp_sale
+# Split a dataset into a train and test set
+def train_test_split(dataset, split):
+	train = list()
+	train_size = split * len(dataset)
+	dataset_copy = list(dataset)
+	while len(train) < train_size:
+		index = randrange(len(dataset_copy))
+		train.append(dataset_copy.pop(index))
+	return train, dataset_copy
 
+# Calculate root mean squared error
+def rmse_metric(actual, predicted):
+	sum_error = 0.0
+	for i in range(len(actual)):
+		prediction_error = predicted[i] - actual[i]
+		sum_error += (prediction_error ** 2)
+	mean_error = sum_error / float(len(actual))
+	return sqrt(mean_error)
 
-def sale_for_data(constant, slope, data):
-    return constant + slope * data   # y = c + ax format
+# Evaluate an algorithm using a train/test split
+def evaluate_algorithm(dataset, algorithm, split, *args):
+	train, test = train_test_split(dataset, split)
+	test_set = list()
+	for row in test:
+		row_copy = list(row)
+		row_copy[-1] = None
+		test_set.append(row_copy)
+	predicted = algorithm(train, test_set, *args)
+	actual = [row[-1] for row in test]
+	rmse = rmse_metric(actual, predicted)
+	return rmse
 
+# Calculate the mean value of a list of numbers
+def mean(values):
+	return sum(values) / float(len(values))
 
-def step_cost_function_for(gdp_sale, constant, slope) :
-    global stepSize
-    diff_sum_constant = 0 # diff of sum for constant 'c' in "c + ax" equation
-    diff_sum_slope = 0  # diff of sum for 'a' in "c + ax" equation
-    gdp_for_years = list(gdp_sale.keys())
+# Calculate covariance between x and y
+def covariance(x, mean_x, y, mean_y):
+	covar = 0.0
+	for i in range(len(x)):
+		covar += (x[i] - mean_x) * (y[i] - mean_y)
+	return covar
 
-    for year_gdp in gdp_for_years: # for each year's gdp in the sample data
-        # get the sale for given 'c' and 'a'by giving the GDP for this sample record
-        trg_data_sale = sale_for_data(constant, slope, year_gdp) # calculated sale for current 'c' and 'a'
-        a_year_sale = gdp_sale.get(year_gdp) # real sale for this record
-        diff_sum_slope = diff_sum_slope + ((trg_data_sale - a_year_sale) * year_gdp) # slope is (h(y) - y) * x
-        diff_sum_constant = diff_sum_constant + (trg_data_sale - a_year_sale) # constant is (h(y) - y)
+# Calculate the variance of a list of numbers
+def variance(values, mean):
+	return sum([(x-mean)**2 for x in values])
 
-    step_for_constant = (stepSize / len(gdp_sale)) * diff_sum_constant # distance to be moved by c
-    step_for_slope = (stepSize / len(gdp_sale)) * diff_sum_slope # distance to be moved by a
-    new_constant = constant - step_for_constant # new c
-    new_slope = slope - step_for_slope # new a
+# Calculate coefficients
+def coefficients(dataset):
+	x = [row[0] for row in dataset]
+	y = [row[1] for row in dataset]
+	x_mean, y_mean = mean(x), mean(y)
+	b1 = covariance(x, x_mean, y, y_mean) / variance(x, x_mean)
+	b0 = y_mean - b1 * x_mean
+	return [b0, b1]
 
-    return new_constant, new_slope
+# Simple linear regression algorithm
+def simple_linear_regression(train, test):
+	predictions = list()
+	b0, b1 = coefficients(train)
+	for row in test:
+		yhat = b0 + b1 * row[0]
+		predictions.append(yhat)
+	return predictions
 
-
-def get_weights(gdp_sale) :
-    constant = 1
-    slope = 1
-    accepted_diff = 0.01
-
-    while 1 == 1:  # continue till we reach local minimum
-        new_constant, new_slope = step_cost_function_for(gdp_sale, constant, slope)
-        # if the diff is too less then lets break
-        if (abs(constant - new_constant) <= accepted_diff) and (abs(slope - new_slope) <= accepted_diff):
-            print("Difference between values in last iteration and current iteration for both constant and slope are less than " + str(accepted_diff))
-            return new_constant, new_slope
-        else:
-            constant = new_constant
-            slope = new_slope
-            print("Updated values: Constant = " + str(new_constant) + ", Slope = " + str(new_slope))
-
-
-def main():
-    contant, slope = get_weights(read_data())
-    print("Final values: Constant : " + str(contant) + ", Slope:" + str(slope))
-
-if __name__ == '__main__':
-    main()
+# Simple linear regression on SwedishMotorInsurance dataset
+seed(1)
+# load and prepare data
+filename = './../resources/swedish_motor_insurance.csv'
+dataset = load_csv(filename)
+for i in range(len(dataset[0])):
+	str_column_to_float(dataset, i)
+# evaluate algorithm
+split = 0.6
+rmse = evaluate_algorithm(dataset, simple_linear_regression, split)
+print('Root Mean Square Error (RMSE) of Linear Regression model: %.3f' % (rmse))
