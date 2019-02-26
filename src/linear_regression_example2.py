@@ -1,6 +1,6 @@
 import collections
 
-stepSize = 0.01
+stepSize = 0.01 # learning rate
 
 
 def read_data() :
@@ -9,7 +9,7 @@ def read_data() :
     for line in data.readlines()[1:] :
         record = line.split(",")
         gdp_sale[float(record[1])] = float(record[2].replace('\n', ""))
-
+    print(gdp_sale)
     return gdp_sale
 
 
@@ -27,8 +27,8 @@ def step_cost_function_for(gdp_sale, constant, slope) :
         # get the sale for given 'c' and 'a'by giving the GDP for this sample record
         trg_data_sale = sale_for_data(constant, slope, year_gdp) # calculated sale for current 'c' and 'a'
         a_year_sale = gdp_sale.get(year_gdp) # real sale for this record
-        diff_sum_slope = diff_sum_slope + ((trg_data_sale - a_year_sale) * year_gdp) # slope's (h(y) - y) * x
-        diff_sum_constant = diff_sum_constant + (trg_data_sale - a_year_sale) # consant's (h(y) - y)
+        diff_sum_slope = diff_sum_slope + ((trg_data_sale - a_year_sale) * year_gdp) # slope is (h(y) - y) * x
+        diff_sum_constant = diff_sum_constant + (trg_data_sale - a_year_sale) # constant is (h(y) - y)
 
     step_for_constant = (stepSize / len(gdp_sale)) * diff_sum_constant # distance to be moved by c
     step_for_slope = (stepSize / len(gdp_sale)) * diff_sum_slope # distance to be moved by a
